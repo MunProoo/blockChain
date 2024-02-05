@@ -16,8 +16,9 @@ type Service struct {
 
 func NewService(config *config.Config, repository *repository.Repository) *Service {
 	s := &Service{
-		config: config,
-		log:    log15.New("module", "service"),
+		config:     config,
+		log:        log15.New("module", "service"),
+		repository: repository,
 	}
 
 	return s

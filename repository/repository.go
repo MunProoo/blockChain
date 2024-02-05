@@ -11,16 +11,17 @@ import (
 
 type Repository struct {
 	client *mongo.Client
-	db     *mongo.Database
+	wallet *mongo.Collection
+	tx     *mongo.Collection
 
-	config *config.Config
-	log    log15.Logger
+	// config *config.Config
+	log log15.Logger
 }
 
 func NewRepository(config *config.Config) (*Repository, error) {
 	r := &Repository{
-		config: config,
-		log:    log15.New("module", "repository"),
+		// config: config,
+		log: log15.New("module", "repository"),
 	}
 
 	var err error
@@ -35,11 +36,12 @@ func NewRepository(config *config.Config) (*Repository, error) {
 		return nil, err
 	}
 
-	r.db = r.client.Database(mConfig.DB)
+	db := r.client.Database(mConfig.DB)
 
-	// TODO -> Collection 변경
+	r.wallet = db.Collection("wallet")
+	r.tx = db.Collection("tx")
 
-	r.log.Error("Success to repository", "uri", mConfig.Uri, "db", mConfig.DB)
+	r.log.Info("Success to repository", "uri", mConfig.Uri, "db", mConfig.DB)
 
 	return r, nil
 }

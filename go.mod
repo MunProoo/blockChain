@@ -3,16 +3,18 @@ module block_chain
 go 1.21.6
 
 require (
+	github.com/hacpy/go-ethereum v1.14.1
 	github.com/inconshreveable/log15 v2.16.0+incompatible
 	github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416
 	go.mongodb.org/mongo-driver v1.13.1
 )
 
 require (
+	github.com/btcsuite/btcd v0.20.1-beta // indirect
+	github.com/btcsuite/btcutil v0.0.0-20190425235716-9e5f4b9a998d // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
-	github.com/golang/snappy v0.0.1 // indirect
+	github.com/golang/snappy v0.0.3-0.20201103224600-674baa8c7fc3 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
-	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
