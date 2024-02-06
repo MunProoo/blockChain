@@ -2,9 +2,11 @@ package repository
 
 import (
 	"block_chain/config"
+	"block_chain/types"
 	"context"
 
 	"github.com/inconshreveable/log15"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -13,6 +15,7 @@ type Repository struct {
 	client *mongo.Client
 	wallet *mongo.Collection
 	tx     *mongo.Collection
+	block  *mongo.Collection
 
 	// config *config.Config
 	log log15.Logger
@@ -40,8 +43,21 @@ func NewRepository(config *config.Config) (*Repository, error) {
 
 	r.wallet = db.Collection("wallet")
 	r.tx = db.Collection("tx")
+	r.block = db.Collection("block")
 
 	r.log.Info("Success to repository", "uri", mConfig.Uri, "db", mConfig.DB)
 
 	return r, nil
+}
+
+func (r *Repository) GetWallet(pk string) (*types.Wallet, error) {
+	ctx := context.Background()
+	filter := bson.M{"privateKey": pk}
+	var wallet types.Wallet
+
+	if err := r.wallet.FindOne(ctx, filter, options.FindOne()).Decode(&wallet); err != nil {
+		return nil, err
+	} else {
+		return &wallet, nil
+	}
 }

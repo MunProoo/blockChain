@@ -2,6 +2,7 @@ package app
 
 import (
 	"block_chain/config"
+	"block_chain/global"
 	"block_chain/repository"
 	"block_chain/service"
 	. "block_chain/types"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"github.com/inconshreveable/log15"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type App struct {
@@ -24,7 +26,7 @@ type App struct {
 	log log15.Logger
 }
 
-func NewApp(config *config.Config) {
+func NewApp(config *config.Config, difficulty int64) {
 	a := &App{
 		config: config,
 		log:    log15.New("module", "app"),
@@ -36,14 +38,21 @@ func NewApp(config *config.Config) {
 	}
 
 	a.log.Info("Module Started", "time", time.Now().Unix())
-	a.service = service.NewService(config, a.repository)
+	a.service = service.NewService(a.repository, difficulty)
 
 	sc := bufio.NewScanner(os.Stdin)
 
-	useCase()
 	for {
+		useCase()
+		from := global.FROM()
+
+		if from != "" {
+			a.log.Info("Current Connected Wallet", "from", from)
+			fmt.Println()
+		}
+
 		sc.Scan()
-		fmt.Println(sc.Text())
+		// fmt.Println(sc.Text())
 
 		// UseCase 입력 파싱
 		input := strings.Split(sc.Text(), " ")
@@ -63,8 +72,10 @@ func useCase() {
 	fmt.Println("Use Case")
 
 	fmt.Println("1. ", CreateWallet)
-	fmt.Println("2. ", TransferCoin, " <To> <Amount>")
-	fmt.Println("3. ", MintCoin, " <To> <Amount>")
+	fmt.Println("2. ", ConnectWallet, " <PK>")
+	fmt.Println("3. ", ChangeWallet, " <PK>")
+	fmt.Println("4. ", TransferCoin, " <To> <Amount>")
+	fmt.Println("5. ", MintCoin, " <To> <Amount>")
 
 	fmt.Println()
 }
@@ -73,23 +84,74 @@ func (a *App) inputValueAssessment(input []string) (msg error) {
 	if len(input) == 0 {
 		msg = errors.New("check Use Case")
 		return
+	} else {
+		from := global.FROM()
+
+		switch input[0] {
+		case CreateWallet:
+			fmt.Println("Create Wallet Command is inputed")
+			if wallet := a.service.MakeWallet(); wallet == nil {
+				panic("Failed to create wallet")
+			} else {
+				a.log.Info("Success to Create Wallet", "pk", wallet.PrivateKey, "pu", wallet.PublicKey)
+			}
+		case ConnectWallet:
+			if from != "" {
+				a.log.Debug("Already Connected Wallet", "from", from)
+				fmt.Println()
+				return
+			}
+
+			pk := input[1]
+			if wallet, err := a.service.GetWallet(pk); err != nil {
+				if err == mongo.ErrNoDocuments {
+					a.log.Debug("Failed to Find wallet. PK is Nil", "pk", pk)
+				} else {
+					a.log.Crit("Failed to Find Wallet", "pk", pk, "err", err)
+				}
+			} else {
+				global.SetFROM(wallet.PublicKey)
+				fmt.Println()
+				a.log.Info("Success To Connect Wallet", "from", wallet.PublicKey)
+			}
+
+		case ChangeWallet:
+			if from == "" {
+				a.log.Debug("Connect Wallet First")
+				fmt.Println()
+				return
+			}
+
+			pk := input[1]
+			if strings.EqualFold(pk, from) {
+				a.log.Info("Same Address", "pk", pk)
+				fmt.Println()
+				return
+			}
+			if wallet, err := a.service.GetWallet(pk); err != nil {
+				if err == mongo.ErrNoDocuments {
+					a.log.Debug("Failed to Find wallet. PK is Nil", "pk", pk)
+				} else {
+					a.log.Crit("Failed to Find Wallet", "pk", pk, "err", err)
+				}
+			} else {
+				global.SetFROM(wallet.PublicKey)
+				fmt.Println()
+				a.log.Info("Success To Change Wallet", "from", wallet.PublicKey)
+			}
+		case TransferCoin:
+
+			a.service.CreateBlock([]*Transaction{}, []byte{}, 0)
+
+		case MintCoin:
+			fmt.Println("MintCoin -------------------")
+
+		default:
+			return msg
+		}
+
+		fmt.Println()
 	}
-
-	switch input[0] {
-	case "1":
-		fmt.Println("Create Wallet is switch")
-		a.service.MakeWallet()
-
-		fmt.Println("Success to Create Wallet")
-	case "2":
-		fmt.Println("TransferCoin is switch")
-	case "3":
-		fmt.Println("MintCoin is switch")
-	default:
-		return msg
-	}
-
-	fmt.Println()
 
 	return nil
 }

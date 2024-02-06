@@ -18,7 +18,7 @@ func main() {
 
 	c := config.NewConfig(*configFlag)
 
-	app.NewApp(c)
+	app.NewApp(c, int64(*difficuilty))
 	fmt.Println(c.Info.Version)
 
 	fmt.Println("test")
