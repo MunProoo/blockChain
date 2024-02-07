@@ -22,3 +22,29 @@ func (r *Repository) CreateNewWallet(wallet *types.Wallet) error {
 	}
 	return nil
 }
+
+func (r *Repository) GetWallet(pk string) (*types.Wallet, error) {
+	ctx := context.Background()
+	filter := bson.M{"privateKey": pk}
+	var wallet types.Wallet
+
+	if err := r.wallet.FindOne(ctx, filter, options.FindOne()).Decode(&wallet); err != nil {
+		return nil, err
+	} else {
+		return &wallet, nil
+	}
+}
+
+// 내가 작성한거.. 수정 할 수도.
+func (r *Repository) GetWalletByPublicKey(publicKey string) (*types.Wallet, error) {
+	ctx := context.Background()
+	filter := bson.M{"publicKey": publicKey}
+	var wallet types.Wallet
+
+	if err := r.wallet.FindOne(ctx, filter, options.FindOne()).Decode(&wallet); err != nil {
+		return nil, err
+	} else {
+		return &wallet, nil
+	}
+
+}

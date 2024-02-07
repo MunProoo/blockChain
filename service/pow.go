@@ -66,6 +66,7 @@ func (p *PowWork) makeHash(nonce int) []byte {
 		[][]byte{
 			p.Block.PrevHash,
 			// ToDO make Transaction To Byte
+			HashTransaction(p.Block),
 			intToHex(p.Difficulty),
 			intToHex(int64(nonce)),
 		},

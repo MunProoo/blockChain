@@ -19,5 +19,18 @@ func (r *Repository) GetLatestBlock() (*types.Block, error) {
 	} else {
 		return &block, nil
 	}
+}
+
+func (r *Repository) SaveBlock(newBlock *types.Block) error {
+	ctx := context.Background()
+
+	filter := bson.M{"hash": newBlock.Hash}
+	update := bson.M{"$set": newBlock}
+
+	if _, err := r.block.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true)); err != nil {
+		return err
+	} else {
+		return nil
+	}
 
 }
