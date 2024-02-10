@@ -11,7 +11,7 @@ import (
 	"github.com/hacpy/go-ethereum/crypto"
 )
 
-func (s *Service) newWallet() (string, string, error) {
+func newWallet() (string, string, error) {
 	p256 := elliptic.P256()
 
 	// 암호화 알고리즘(타원 곡선 등)을 통해 메세지 서명 or 키를 암호화
@@ -56,10 +56,16 @@ func (s *Service) newWallet() (string, string, error) {
 }
 
 func (s *Service) MakeWallet() *types.Wallet {
-	var wallet types.Wallet
+	// var wallet types.Wallet
+	// wallet.Balance = ""
+
+	// 초기화할 값이 있으니까 위에 처럼 "타입 추론" 안 시켜줘도 될듯
+	wallet := types.Wallet{
+		Balance: "0",
+	}
 	var err error
 
-	if wallet.PrivateKey, wallet.PublicKey, err = s.newWallet(); err != nil {
+	if wallet.PrivateKey, wallet.PublicKey, err = newWallet(); err != nil {
 		return nil
 	} else if err = s.repository.CreateNewWallet(&wallet); err != nil {
 		return nil

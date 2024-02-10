@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+
+	"github.com/hacpy/go-ethereum/common/hexutil"
 )
 
 // 채굴 작업
@@ -31,7 +33,7 @@ func (s *Service) NewPow(b *types.Block) *PowWork {
 }
 
 // 채굴작업
-func (p *PowWork) RunMining() (int64, []byte) {
+func (p *PowWork) RunMining() (int64, string) {
 	var iHash big.Int
 	var hash [32]byte
 
@@ -58,13 +60,13 @@ func (p *PowWork) RunMining() (int64, []byte) {
 	}
 
 	fmt.Println()
-	return int64(nonce), hash[:]
+	return int64(nonce), hexutil.Encode(hash[:])
 }
 
 func (p *PowWork) makeHash(nonce int) []byte {
 	return bytes.Join(
 		[][]byte{
-			p.Block.PrevHash,
+			[]byte(p.Block.PrevHash),
 			// ToDO make Transaction To Byte
 			HashTransaction(p.Block),
 			intToHex(p.Difficulty),

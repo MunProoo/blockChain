@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hacpy/go-ethereum/common"
 	"github.com/inconshreveable/log15"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -121,7 +122,6 @@ func (a *App) inputValueAssessment(input []string) (msg error) {
 				fmt.Println()
 				return
 			}
-
 			pk := input[1]
 			if strings.EqualFold(pk, from) {
 				a.log.Info("Same Address", "pk", pk)
@@ -139,12 +139,38 @@ func (a *App) inputValueAssessment(input []string) (msg error) {
 				fmt.Println()
 				a.log.Info("Success To Change Wallet", "from", wallet.PublicKey)
 			}
-		case TransferCoin:
+		case TransferCoin: // 코인을 건내준다. 이동.
+			if from == "" {
+				a.log.Debug("Connect Wallet First")
+				fmt.Println()
+				return
+			} else if len(input) < 3 {
+				a.log.Debug("Insufficient Input")
+				fmt.Println()
+				return
+			}
 
-			a.service.CreateBlock([]*Transaction{}, []byte{}, 0)
+			to, value := input[1], input[2]
+			if to == "" || value == "" {
+				a.log.Debug("Request value, to is uncorrect")
+				fmt.Println()
+				return
+			}
+			a.service.CreateBlock(from, to, value)
 
-		case MintCoin:
-			fmt.Println("MintCoin -------------------")
+		case MintCoin: // 관리자 -> 사용자 계좌에 입금 (자산 변환)
+			if len(input) < 3 {
+				a.log.Debug("Insufficient Input")
+				fmt.Println()
+				return
+			}
+			to, value := input[1], input[2]
+			if to == "" || value == "" {
+				a.log.Debug("Request value, to is uncorrect")
+				fmt.Println()
+				return
+			}
+			a.service.CreateBlock((common.Address{}).String(), to, value)
 
 		default:
 			return msg
