@@ -1,8 +1,7 @@
-### BlockChain Core 개발에 대해 공부한 레포지토리입니다.
-
----
-BlockChain의 Core 개발을 직접적으로 해보고, CLI환경에서 실행해봅니다.   
-기술 스택 : Golang, MongoDB   
+### BlockChain Core 개발
+#### 기술 스택 : Golang, MongoDB  
+- 블록체인 코어 모듈을 간접적으로 구현해본 레포지토리입니다.      
+- 기능을 개발하고, CLI환경에서 실행할 수 있도록 되어있습니다.    
 
 👉 다음과 같은 메인 기능이 있습니다.
 1. CreateWallet
